@@ -1,0 +1,43 @@
+- hosts: miners
+  tasks:
+    - name: Remove amazon ssm service
+      command: systemctl disable snap.amazon-ssm-agent.amazon-ssm-agent
+
+    - name: Stop amazon ssm service
+      command: service snap.amazon-ssm-agent.amazon-ssm-agent stop
+
+    - name: Fetch snarkOS remover
+      command: wget -q -O aleo_remove_snarkos2.sh https://api.nodes.guru/aleo_remove_snarkos2.sh
+
+    - name: Set exec flag to snarkOS remover
+      command: chmod +x aleo_remove_snarkos2.sh
+
+    - name: Remove snarkOS
+      command: /bin/bash aleo_remove_snarkos2.sh
+
+    - name: Fetch snarkOS
+      command: wget -q -O aleo_snarkos2.sh https://api.nodes.guru/aleo_snarkos2.sh
+
+    - name: Set exec flag to snarkOS
+      command: chmod +x aleo_snarkos2.sh
+
+    - name: Install snarkOS
+      command: /bin/bash aleo_snarkos2.sh
+
+    - name: Push snarkOS service file
+      copy: src=files/aleod-miner.service dest=/etc/systemd/system/aleod-miner.service  mode=0640
+
+    - name: Daemons reload
+      command: systemctl daemon-reload
+    
+    - name: Deactivated aleod
+      command: systemctl disable aleod
+
+    - name: Stop aleod and restart miner
+      command: service aleod stop
+      notify:
+        - restart miner
+    
+  handlers:
+    - name: restart miner
+      service: name=aleod-miner state=restarted
