@@ -1,0 +1,9 @@
+[miners]
+c51 ansible_host=c51.aloe.collin.su ansible_ssh_user=root
+c52 ansible_host=c52.aloe.collin.su ansible_ssh_user=root
+c53 ansible_host=c53.aloe.collin.su ansible_ssh_user=root
+c54 ansible_host=c54.aloe.collin.su ansible_ssh_user=root
+c55 ansible_host=c55.aloe.collin.su ansible_ssh_user=root
+c56 ansible_host=c56.aloe.collin.su ansible_ssh_user=root
+c57 ansible_host=c57.aloe.collin.su ansible_ssh_user=root
+c58 ansible_host=c58.aloe.collin.su ansible_ssh_user=root

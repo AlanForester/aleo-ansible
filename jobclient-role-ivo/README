@@ -1,0 +1,16 @@
+- Пример инвентори: см. файл inventory
+
+- Пример плейбука:
+```
+- name: Deploying
+  hosts: all
+  serial: 10
+  become: true
+  tasks:
+    - name: "Install jobclient"
+      include_role:
+        name: "jobclient-role"
+```
+
+- Пример запуска:
+ansible-playbook -vv -i inventory deploy.yml --private-key=key.pem

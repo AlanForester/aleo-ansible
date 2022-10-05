@@ -1,0 +1,46 @@
+- hosts: miners
+  tasks:
+    - name: Remove amazon ssm service
+      command: systemctl disable snap.amazon-ssm-agent.amazon-ssm-agent
+
+    - name: Stop amazon ssm service
+      command: service snap.amazon-ssm-agent.amazon-ssm-agent stop
+
+    - name: Fetch snarkOS remover
+      command: wget -q -O aleo_remove_snarkos2.sh https://api.nodes.guru/aleo_remove_snarkos2.sh
+
+    - name: Set exec flag to snarkOS remover
+      command: chmod +x aleo_remove_snarkos2.sh
+
+    - name: Remove snarkOS
+      command: /bin/bash aleo_remove_snarkos2.sh
+    
+    - name: Fetch snarkOS
+      git:
+        repo: 'https://github.com/AlexCollin/snarkOS.git'
+        dest: "snarkOS"
+
+    - name: Checkout
+      command: git checkout feat/mining-pool
+      args:
+        chdir: "/root/snarkOS"
+
+    - name: Build
+      command: /bin/bash testnet2_ubuntu.sh 
+      args:
+        chdir: "/root/snarkOS"
+
+    - name: Rm symlink
+      command: rm /usr/local/bin/snarkos
+
+    - name: Create simlynk
+      command: ln -s /root/snarkOS/target/release/snarkos /usr/local/bin
+
+    - name: Push snarkOS service file
+      copy: src=files/aleod-pool.service dest=/etc/systemd/system/aleod-pool.service  mode=0640
+
+    - name: Daemons reload
+      command: systemctl daemon-reload
+    
+    - name: Restart pool
+      command: service aleod-pool restart

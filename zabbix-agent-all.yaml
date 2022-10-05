@@ -1,0 +1,71 @@
+
+- hosts: linux:windows 
+  tasks:
+    - name: Install agent
+      include_role:
+        name:  community.zabbix.zabbix_agent # устанавливает готовую роль на хостах
+      tags:
+        - install # для удобства можно использовать тэги
+        
+ - hosts: localhost # обращаемся к api через модуль с локального хоста
+    - name: Create a new linux or windows host or update an existing host's info # задача для регистрации агентов в zabbix сервере
+      local_action:
+        module: community.zabbix.zabbix_host # используем готовый модуль zabbix_host для регистрации агентов
+        server_url: "{{ zabbix_url }}" # переменная из инвентаря - url сервера для регистрации API
+        login_user: "{{ zabbix_api_user }}" # переменная из инвентаря - имя пользователя обычно Admin
+        login_password: "{{ zabbix_api_pass }}" # переменная из инвентаря - пароль 
+        host_name: "{{ item }}" - # имя хоста из инвентаря
+        visible_name: "{{ hostvars[item].zabbix_visible_name | default(item) }}" # можно задать отображаемое имя отдельно для каждого хоста
+        description: "{{   hostvars[item].zabbix_host_description | default('') }} OS: {{  hostvars[item].ansible_distribution | default('') }} {{  hostvars[item].ansible_distribution_version | default('') }}" # берет описание из инвентаря и добавляет название операционной системы и версию из служебных переменных ansible
+        host_groups: "{{ hostvars[item].zabbix_host_groups }}" # в какую хост группу добавить хост
+        link_templates: "{{ hostvars[item].zabbix_link_templates }}" # какие template применить к хосту
+        status: "{{  hostvars[item].zabbix_host_status }}" # статус - Enabled или Disabled
+        state: present # указание ansible чтобы добавить хост, изменив на absent можно сделать обратную операцию удаления
+        inventory_mode: disabled # не включаем inventory mode
+        interfaces: # можно указать несколько интерфейсов
+          - type: "{{ hostvars[item].zabbix_interface_type }}" # переменная из инвентаря - может быть SNMP, Agent, JMX, IPMI
+            main: 1 
+            useip: "{{ hostvars[item].zabbix_interface_use_ip }}" # можно использовать добавление по ip или по dns
+            ip: "{{ hostvars[item].zabbix_interface_ip }}" # если выбрано по ip - берется переменная с ip адресом
+            dns: "{{ item }}" # если выбрано useip: 0 то нужно указать FQDN хоста в переменных в инвентаре
+            port: "{{ hostvars[item].zabbix_interface_port }}" # указание порта
+      with_items:
+        - "{{ groups['windows'] if groups['windows'] is defined else [] }}" # проходим по хостам в группе windows если указано в инвентаре
+        - "{{ groups['linux'] if groups['linux'] is defined else [] }}" # проходим по хостам в группе windows если указано в инвентаре
+      tags:
+        - add-host #  добавляем тэги для удобства
+        
+ - hosts: localhost # обращаемся к api через модуль с локального хоста
+   tasks:
+     - name: Create a new host or update an existing SNMP host's info
+       local_action:
+         module: community.zabbix.zabbix_host # используем готовый модуль zabbix_host для регистрации агентов
+         server_url: "{{ zabbix_url }}" # переменная из инвентаря - url сервера для регистрации API
+         login_user: "{{ zabbix_api_user }}" # переменная из инвентаря - имя пользователя обычно Admin
+         login_password: "{{ zabbix_api_pass }}" # переменная из инвентаря - пароль 
+         host_name: "{{ item }}" - # имя хоста из инвентаря
+         visible_name: "{{ hostvars[item].zabbix_visible_name | default(item) }}" # можно задать отображаемое имя отдельно для каждого хоста
+         description: "{{   hostvars[item].zabbix_host_description | default('') }} OS: {{  hostvars[item].ansible_distribution | default('') }} {{  hostvars[item].ansible_distribution_version | default('') }}" # берет описание из инвентаря и добавляет название операционной системы и версию из служебных переменных ansible
+         host_groups: "{{ hostvars[item].zabbix_host_groups }}" # в какую хост группу добавить хост
+         link_templates: "{{ hostvars[item].zabbix_link_templates }}" # какие template применить к хосту
+         status: "{{  hostvars[item].zabbix_host_status }}" # статус - Enabled или Disabled
+         state: present # указание ansible чтобы добавить хост, изменив на absent можно сделать обратную операцию удаления
+         inventory_mode: disabled # отключаем inventory mode
+         interfaces:
+           - type: "{{ hostvars[item].zabbix_interface_type }}" # берем значние из переменных
+             main: 1
+             useip: "{{ hostvars[item].zabbix_interface_use_ip }}" # указываем на добавление по ip или dns
+             ip: "{{ hostvars[item].zabbix_interface_ip }}" # берем значние из переменных
+             dns: "{{ item }}"
+             port: "{{ hostvars[item].zabbix_interface_port }}" # берем значние из переменных
+             details:
+               community : "{$SNMP_COMMUNITY}" # указываем community
+               bulk: 1 
+               version: 2 # версия SNMP
+         macros:
+           - macro: '{$SNMP_COMMUNITY}' # создаем макрос
+             value: "{{ hostvars[item].zabbix_snmp_community }}" # берем community из переменных 
+       loop: "{{ groups['snmp'] }}"
+       when: groups['snmp'] is defined # таска отработает только если запущен скрипт для snmp хостов
+       tags:
+         - add-snmp #  добавляем тэги для удобств

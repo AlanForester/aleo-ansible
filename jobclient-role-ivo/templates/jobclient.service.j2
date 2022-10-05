@@ -1,0 +1,18 @@
+[Unit]
+Description=JobClient
+After=network-online.target
+
+[Service]
+{% set parallel_args = " --parallel-jobs " + jobclient_parallel_jobs|string if jobclient_parallel_jobs is defined else "" %}
+{% set pool_args = " --pool-size " + jobclient_pool_size|string if jobclient_pool_size is defined else "" %}
+{% set group_args = " --group " + jobclient_group if jobclient_group is defined else "" %}
+{% set show_args = " --show-stdout" if jobclient_show_stdout else "" %}
+{% set high_args = " --use-high" if jobclient_use_high else "" %}
+{% set client_args = " --client-name \"" + jobclient_name + "\"" if jobclient_name is defined else "" %}
+{% set additional_args = parallel_args + pool_args + group_args + show_args + high_args + client_args %}
+ExecStart={{ jobclient_home }}/{{ jobclient_script }} -s {{ jobclient_server_addr }}{{ additional_args }} -pp {{ jobclient_home }}/snarkos_mine
+Restart=on-failure
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

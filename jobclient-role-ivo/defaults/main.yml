@@ -1,0 +1,12 @@
+---
+jobclient_home: /opt/pool-client
+#jobclient_script_path: jobclient.py
+#jobclient_snarkos_path: 
+#jobclient_server_addr: 
+#jobclient_parallel_jobs:
+#jobclient_pool_size:
+#jobclient_group:
+jobclient_show_stdout: false
+jobclient_use_high: false
+#jobclient_name:
+jobclient_script: jobclient.py

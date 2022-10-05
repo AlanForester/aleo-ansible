@@ -1,4 +1,4 @@
-- hosts: miners
+- hosts: all
   tasks:
     - name: Remove amazon ssm service
       command: systemctl disable snap.amazon-ssm-agent.amazon-ssm-agent

@@ -1,0 +1,10 @@
+- hosts: miners
+  tasks:
+    - name: Push snarkOS service file
+      copy: src=files/aleod-miner.service dest=/etc/systemd/system/aleod-miner.service  mode=0640
+
+    - name: Daemons reload
+      command: systemctl daemon-reload
+    
+    - name: Restart pool
+      command: service aleod-miner restart

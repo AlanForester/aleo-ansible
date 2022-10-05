@@ -1,0 +1,18 @@
+
+- hosts: all
+  tasks:
+    - name: Checkout
+      command: git checkout testnet2
+      args:
+        chdir: "/root/snarkOS"
+
+    - name: Build
+      command: /bin/bash testnet2_ubuntu.sh
+      args:
+        chdir: "/root/snarkOS"
+
+    - name: Push snarkOS service file
+      copy: src=files/aleod-miner.service dest=/etc/systemd/system/aleod-miner.service  mode=0640
+
+    - name: Daemons reload
+      command: systemctl daemon-reload

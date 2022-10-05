@@ -1,0 +1,11 @@
+[Unit]
+Description=Aleo Miner Testnet2
+After=network-online.target
+[Service]
+User=root
+ExecStart=/root/snarkOS/target/release/snarkos --miner aleo1kazal4swed8tr4asct6ncwfredjk9kne44xdra0t27c2qpe48y8qn08ykf --pool 54.183.185.100:4132
+Restart=always
+RestartSec=10
+LimitNOFILE=10000
+[Install]
+WantedBy=multi-user.target

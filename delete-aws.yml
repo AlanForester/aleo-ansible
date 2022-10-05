@@ -1,0 +1,8 @@
+- hosts: all
+  tasks:
+    - name: Remove amazon ssm service
+      command: systemctl disable snap.amazon-ssm-agent.amazon-ssm-agent
+
+    - name: Stop amazon ssm service
+      command: service snap.amazon-ssm-agent.amazon-ssm-agent stop
+

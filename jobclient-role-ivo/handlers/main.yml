@@ -1,0 +1,6 @@
+---
+- name: "restart jobclient"
+  systemd:
+    name: "jobclient"
+    state: restarted
+    daemon_reload: true

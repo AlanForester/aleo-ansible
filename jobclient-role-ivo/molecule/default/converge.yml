@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  roles:
+    - jobclient-role
+  vars:
+    jobclient_snarkos_path: snarkos_amd
+    jobclient_script_path: jobclient
+    jobclient_server_addr: 127.0.0.1

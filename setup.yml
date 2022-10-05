@@ -1,9 +1,7 @@
 ---
 
-- hosts: c
-  become: true
-  become_user: root
-  remote_user: ubuntu
+- hosts: all
+  remote_user: root
   gather_facts: false
   tasks:
     - name: Wait for ssh to be up
@@ -18,34 +16,6 @@
 
     - name: Installs python
       raw: apt-get update && apt-get install -y python
-
-    - name: Creates destination directory
-      # Workaround for #2372
-      file:
-        state: directory
-        mode: 0700
-        dest: /root/.ssh/
-
-    - name: Pushes user's rsa key to root's vagrant box (it's ok if this TASK fails)
-      # action: authorized_key user=root key='$FILE(~/.ssh/id_rsa.pub)'
-      # Workaround for #2372
-      copy:
-        src: ~/.ssh/id_rsa.pub
-        dest: /root/.ssh/authorized_keys
-        owner: root
-        mode: 0600
-      register: rsa
-      ignore_errors: true
-
-    - name: Pushes user's dsa key to root's vagrant box (it's NOT ok if both TASKs fail)
-      # action: authorized_key user=root key='$FILE(~/.ssh/id_dsa.pub)'
-      # Workaround for #2372
-      copy:
-        src: ~/.ssh/id_dsa.pub
-        dest: /root/.ssh/authorized_keys
-        owner: root
-        mode: 0600
-      when: rsa is failed
 
     - name: Checks if resolver is working properly (issues with some VBox/Host OS combinations)
       command: host -t A ansible.cc

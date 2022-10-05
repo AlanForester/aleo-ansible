@@ -1,0 +1,13 @@
+- hosts: nodes
+  tasks:
+    - name: Stop miner
+      command: service aleod-miner stop
+    
+    - name: Disable miner    
+      command: systemctl disable aleod-miner 
+
+    - name: Enable node    
+      command: systemctl enable aleod
+
+    - name: Start node
+      command: service aleod restart
